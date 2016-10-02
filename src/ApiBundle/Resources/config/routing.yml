@@ -1,0 +1,17 @@
+api_homepage:
+    path:     /
+    defaults: { _controller: ApiBundle:Default:index }
+
+group:
+    type: rest
+    resource: ApiBundle\Controller\GroupController
+
+session:
+    type: rest
+    parent: group
+    resource: ApiBundle\Controller\SessionController
+
+smoek:
+    type: rest
+    parent: session
+    resource: ApiBundle\Controller\SmoekController
