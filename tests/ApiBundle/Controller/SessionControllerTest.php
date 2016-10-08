@@ -24,9 +24,7 @@ class SessionControllerTest extends WebTestCase
         $this->client = static::createClient();
 
         $groupName = 'Smoekers';
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $groupName]
-        ]);
+        $this->client->request('POST', '/group', ['name' => $groupName]);
         $groupRepository = $this->client->getContainer()->get('doctrine')->getManager()->getRepository('ApiBundle:Group');
         $group = $groupRepository->findOneByName($groupName);
         $this->groupUuid = $group->getUuid();
@@ -35,9 +33,7 @@ class SessionControllerTest extends WebTestCase
     public function testCanCreateNewSession()
     {
         $sessionName = 'TheSmoeker';
-        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['session' => [
-            'name' => $sessionName
-        ]]);
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
         $this->assertStatusCode(201, $this->client,
             'Creating a new session should be successful.');
         $decodedResponse = json_decode($this->client->getResponse()->getContent());
@@ -60,9 +56,7 @@ class SessionControllerTest extends WebTestCase
     {
         $nonExistentUuid = '1234';
         $sessionName = 'TheSmoeker';
-        $this->client->request('POST', '/group/' . $nonExistentUuid . '/session', ['session' => [
-            'name' => $sessionName
-        ]]);
+        $this->client->request('POST', '/group/' . $nonExistentUuid . '/session', ['name' => $sessionName]);
         $this->assertStatusCode(404, $this->client,
             'Creating a new session should be successful.');
         $expectedResponse = [
@@ -76,9 +70,7 @@ class SessionControllerTest extends WebTestCase
     public function testCanDeleteExistingSession()
     {
         $sessionName = 'TheSmoeker';
-        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['session' => [
-            'name' => $sessionName
-        ]]);
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
         $this->assertStatusCode(201, $this->client,
             'Creating a new session should be successful.');
 

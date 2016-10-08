@@ -22,7 +22,10 @@ class SessionController extends BaseController
         }
 
         $session = new Session();
-        $form = $this->createForm('\ApiBundle\Form\SessionType', $session);
+
+        /* Manually set the form name to null, to get forms like name=smoeks instead of session[name]=smoeks */
+        $form = $this->get('form.factory')->createNamedBuilder(null, '\ApiBundle\Form\SessionType', $session)
+            ->getForm();
         $form->handleRequest($request);
 
         if ($form->isValid()) {

@@ -28,18 +28,14 @@ class SmoekControllerTest extends WebTestCase
         $this->client = static::createClient();
 
         $groupName = 'Smoekers';
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $groupName]
-        ]);
+        $this->client->request('POST', '/group', ['name' => $groupName]);
         $this->assertTrue($this->client->getResponse()->isSuccessful());
         $decodedResponse = json_decode($this->client->getResponse()->getContent());
         $this->groupUuid = $decodedResponse->id;
 
         $sessionNames = ['The Smoker', 'La Cigaretta', 'Benson & Hedges', "Let's Smoke"];
         foreach ($sessionNames as $i => $sessionName) {
-            $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['session' => [
-                'name' => $sessionName,
-            ]]);
+            $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
             $this->assertTrue($this->client->getResponse()->isSuccessful());
             $decodedResponse = json_decode($this->client->getResponse()->getContent());
             $this->sessionUuids[$i] = $decodedResponse->id;

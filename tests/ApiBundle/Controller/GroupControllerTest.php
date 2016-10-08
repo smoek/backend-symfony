@@ -27,15 +27,11 @@ class GroupControllerTest extends WebTestCase
     {
         $groupName = 'Smoekers';
 
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $groupName]
-        ]);
+        $this->client->request('POST', '/group', ['name' => $groupName]);
         $this->assertTrue($this->client->getResponse()->isSuccessful(),
             'Creating a group should be successful.');
 
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $groupName]
-        ]);
+        $this->client->request('POST', '/group', ['name' => $groupName]);
         $this->assertStatusCode(409, $this->client);
 
         $expectedResponse = [
@@ -49,9 +45,7 @@ class GroupControllerTest extends WebTestCase
     public function testCanCreateAndListExistingGroups()
     {
         $firstGroupName = 'Smoekers';
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $firstGroupName,
-        ]]);
+        $this->client->request('POST', '/group', ['name' => $firstGroupName]);
         $this->assertStatusCode(201, $this->client);
         $decodedResponse = json_decode($this->client->getResponse()->getContent());
         $this->assertEquals($firstGroupName, $decodedResponse->name,
@@ -61,9 +55,7 @@ class GroupControllerTest extends WebTestCase
             'The UUID of the group should be contained in the response.');
 
         $secondGroupName = 'Raucher';
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $secondGroupName,
-        ]]);
+        $this->client->request('POST', '/group', ['name' => $secondGroupName]);
         $this->assertStatusCode(201, $this->client);
 
         $this->client->request('GET', '/group');
@@ -83,9 +75,7 @@ class GroupControllerTest extends WebTestCase
     public function testCanRetrieveASingleGroup()
     {
         $firstGroupName = 'Smoekers';
-        $this->client->request('POST', '/group', ['group' => [
-            'name' => $firstGroupName,
-        ]]);
+        $this->client->request('POST', '/group', ['name' => $firstGroupName]);
         $decodedResponse = json_decode($this->client->getResponse()->getContent());
         $uuid = $decodedResponse->id;
 

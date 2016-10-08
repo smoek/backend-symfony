@@ -23,7 +23,9 @@ class GroupController extends BaseController
 
     private function processForm(Group $group, Request $request)
     {
-        $form = $this->createForm('\ApiBundle\Form\GroupType', $group);
+        /* Manually set the form name to null, to get forms like name=smoeks instead of group[name]=smoeks */
+        $form = $this->get('form.factory')->createNamedBuilder(null, '\ApiBundle\Form\GroupType', $group)
+            ->getForm();
         $form->handleRequest($request);
 
         if ($form->isValid()) {
