@@ -79,25 +79,6 @@ class GroupController extends BaseController
     }
 
     /**
-     * Get a Form instance.
-     *
-     * @param Article|null $article
-     * @param string|null $routeName
-     * @return Form
-     */
-    protected function getForm($article = null, $routeName = null)
-    {
-        $options = array();
-        if (null !== $routeName) {
-            $options['action'] = $this->generateUrl($routeName);
-        }
-        if (null === $article) {
-            $article = new Group();
-        }
-        return $this->createForm('ApiBundle\Form\GroupType', $article, $options);
-    }
-
-    /**
      * @param string $uuid
      * @return static
      */
