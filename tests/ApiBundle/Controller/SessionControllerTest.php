@@ -59,12 +59,6 @@ class SessionControllerTest extends WebTestCase
         $this->client->request('POST', '/group/' . $nonExistentUuid . '/session', ['name' => $sessionName]);
         $this->assertStatusCode(404, $this->client,
             'Creating a new session should be successful.');
-        $expectedResponse = [
-            'id' => 'error.group.not_found',
-            'message' => "A group with UUID '$nonExistentUuid' does not exist."
-        ];
-        $this->assertEquals(json_encode($expectedResponse), $this->client->getResponse()->getContent(),
-            'The error message should use the right error id and message.');
     }
 
     public function testCanDeleteExistingSession()

@@ -2,11 +2,14 @@
 
 namespace ApiBundle\Controller;
 
+use ApiBundle\Entity\Group;
 use ApiBundle\Entity\Session;
 use Doctrine\Common\Collections\ArrayCollection;
+use FOS\RestBundle\Controller\Annotations\Route;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 use FOS\RestBundle\View\View;
 use Ramsey\Uuid\Uuid;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -14,13 +17,16 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class SessionController extends BaseController
 {
-    public function postAction($uuid, Request $request)
+    /**
+     * The Route needs to be declared explicitly, otherwise the ParamConverter assumes it is matched by ID, not UUID
+     * @Route("/group/{uuid}/session")
+     *
+     * @param Group $group
+     * @param Request $request
+     * @return Group|\ApiBundle\Entity\Group|View|static
+     */
+    public function postAction(Group $group, Request $request)
     {
-        $group = $this->getGroupOr404($uuid);
-        if ($group instanceof View){
-            return $group;
-        }
-
         $session = new Session();
 
         /* Manually set the form name to null, to get forms like name=smoeks instead of session[name]=smoeks */
@@ -30,17 +36,7 @@ class SessionController extends BaseController
 
         if ($form->isValid()) {
 
-            $sessionRepository = $this->getDoctrine()->getManager()->getRepository('ApiBundle:Session');
-
-            while (true) {
-                $uuid = Uuid::uuid4();
-
-                /* Keep on generating a UUID until no group with that UUID is found */
-                $existingSessionWithUuid = $sessionRepository->findOneByUuid($uuid);
-                if (!$existingSessionWithUuid) {
-                    break;
-                }
-            }
+            $uuid = $this->findUniqueUuid();
 
             $session->setUuid($uuid);
             $session->setGroup($group);
@@ -52,19 +48,37 @@ class SessionController extends BaseController
 
             return View::create($session, 201);
         }
+
+        /*
+         * TODO: There's gotta be a better way to create the error message the way the API requires them. Probably
+         * something with FOSRestBundles ExceptionWrapperHandler or FormErrorNormalizer
+         */
+        $nameErrors = $form->get('name')->getErrors(true);
+        if ($nameErrors[0]->getMessage() === 'error.group.already_exists') {
+            return View::create([
+                'id' => 'error.group.already_exists',
+                'message' => sprintf('A group with name \'%s\' already exists.', $group->getName()),
+            ], 409);
+        }
+
+        return View::create($form, 400);
     }
 
-    public function deleteAction($groupUuid, $sessionUuid)
+    public function optionsAction($groupUuid)
     {
-        $group = $this->getGroupOr404($groupUuid);
-        if ($group instanceof View) {
-            return $group;
-        }
-        $session = $this->getSessionOr404($sessionUuid, $group);
-        if ($session instanceof View) {
-            return $session;
-        }
 
+    }
+
+    /**
+     * @Route("/group/{uuid}/session/{sessionUuid}")
+     * @ParamConverter("session", options={"mapping": {"sessionUuid": "uuid"}})
+     *
+     * @param Group $group
+     * @param Session $session
+     * @return static
+     */
+    public function deleteAction(Group $group, Session $session)
+    {
         $em = $this->getDoctrine()->getManager();
         $em->remove($session);
 
@@ -81,5 +95,26 @@ class SessionController extends BaseController
         $em->flush();
 
         return View::create([], 200);
+    }
+
+    /**
+     * Generate a UUID for the session. Keeps on generating until a UUID has been generated that does not exist yet.
+     *
+     * @return string The generated UUID
+     */
+    private function findUniqueUuid(): string
+    {
+        $sessionRepository = $this->getDoctrine()->getManager()->getRepository('ApiBundle:Session');
+
+        while (true) {
+            $uuid = Uuid::uuid4();
+
+            /* Keep on generating a UUID until no group with that UUID is found */
+            $existingSessionWithUuid = $sessionRepository->findOneByUuid($uuid);
+            if (!$existingSessionWithUuid) {
+                break;
+            }
+        }
+        return $uuid->toString();
     }
 }

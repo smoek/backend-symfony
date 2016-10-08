@@ -88,12 +88,5 @@ class GroupControllerTest extends WebTestCase
         $uuid = Uuid::uuid4()->toString();
         $this->client->request('GET', '/group/' . $uuid);
         $this->assertStatusCode(404, $this->client);
-
-        $expectedResponse = [
-            'id' => 'error.group.not_found',
-            'message' => "A group with UUID '$uuid' does not exist."
-        ];
-        $this->assertEquals(json_encode($expectedResponse), $this->client->getResponse()->getContent(),
-            'The error message should use the right error id and message.');
     }
 }

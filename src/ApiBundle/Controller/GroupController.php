@@ -4,11 +4,10 @@ namespace ApiBundle\Controller;
 
 use ApiBundle\Entity\Group;
 use ApiBundle\Form\GroupType;
+use FOS\RestBundle\Controller\Annotations\Route;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 use FOS\RestBundle\View\View;
 use Ramsey\Uuid\Uuid;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -79,12 +78,14 @@ class GroupController extends BaseController
     }
 
     /**
+     * The Route needs to be declared explicitly, otherwise the ParamConverter assumes it is matched by ID
+     * @Route("/group/{uuid}")
+     *
      * @param string $uuid
      * @return static
      */
-    public function getAction(string $uuid)
+    public function getAction(Group $group)
     {
-        $group = $this->getGroupOr404($uuid);
         return $group;
     }
 

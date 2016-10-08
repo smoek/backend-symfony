@@ -10,42 +10,23 @@ namespace ApiBundle\Controller;
 
 use ApiBundle\Entity\Group;
 use ApiBundle\Entity\Session;
+use FOS\RestBundle\Controller\Annotations\Route;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 use FOS\RestBundle\View\View;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 /**
  * @RouteResource("Smoek", pluralize=false)
  */
 class SmoekController extends BaseController
 {
-    public function postAction($groupUuid, $sessionUuid)
+    /**
+     * @Route("/group/{uuid}/session/{sessionUuid}/smoek")
+     * @ParamConverter("session", options={"mapping": {"sessionUuid": "uuid"}})
+     */
+    public function postAction(Group $group, Session $session)
     {
         $em = $this->getDoctrine()->getManager();
-
-        /* TODO: Getting the group and session from the request should happen automatically */
-        $groupRepository = $em->getRepository('ApiBundle:Group');
-        /** @var Group $group */
-        $group = $groupRepository->findOneByUuid($groupUuid);
-
-        if (!$group) {
-            return View::create([
-                'id' => 'error.group.not_found',
-                'message' => sprintf('A group with UUID \'%s\' does not exist.', $groupUuid),
-            ], 404);
-        }
-
-        $sessionRepository = $em->getRepository('ApiBundle:Session');
-        $session = $sessionRepository->findOneBy([
-            'uuid' => $sessionUuid,
-            'group' => $group,
-        ]);
-
-        if (!$session) {
-            return View::create([
-                'id' => 'error.session.not_found',
-                'message' => sprintf('A session with UUID \'%s\' does not exist.', $sessionUuid),
-            ], 404);
-        }
 
         $session->setSmoek(true);
 
@@ -70,33 +51,13 @@ class SmoekController extends BaseController
         return View::create([], 201);
     }
 
-    public function deleteAction($groupUuid, $sessionUuid)
+    /**
+     * @Route("/group/{uuid}/session/{sessionUuid}/smoek")
+     * @ParamConverter("session", options={"mapping": {"sessionUuid": "uuid"}})
+     */
+    public function deleteAction(Group $group, Session $session)
     {
         $em = $this->getDoctrine()->getManager();
-
-        $groupRepository = $em->getRepository('ApiBundle:Group');
-        /** @var Group $group */
-        $group = $groupRepository->findOneByUuid($groupUuid);
-
-        if (!$group) {
-            return View::create([
-                'id' => 'error.group.not_found',
-                'message' => sprintf('A group with UUID \'%s\' does not exist.', $groupUuid),
-            ], 404);
-        }
-
-        $sessionRepository = $em->getRepository('ApiBundle:Session');
-        $session = $sessionRepository->findOneBy([
-            'uuid' => $sessionUuid,
-            'group' => $group,
-        ]);
-
-        if (!$session) {
-            return View::create([
-                'id' => 'error.session.not_found',
-                'message' => sprintf('A session with UUID \'%s\' does not exist.', $sessionUuid),
-            ], 404);
-        }
 
         if ($group->getSmoekConfirmedAt() !== null) {
             return View::create([], 409);
