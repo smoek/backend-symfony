@@ -88,4 +88,39 @@ class SessionControllerTest extends WebTestCase
             'Deleting a non-existent session should not be successful.');
     }
 
+    public function testThrows409WhenSessionNameAlreadyExistsInGroup()
+    {
+        $sessionName = 'TheSmoeker';
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
+        $this->assertStatusCode(201, $this->client,
+            'Creating a new session should be successful.');
+
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
+        $this->assertStatusCode(409, $this->client,
+            'Using the same session name twice should not be successful.');
+        $decodedResponse = json_decode($this->client->getResponse()->getContent());
+        $errorId = $decodedResponse->id;
+        $this->assertEquals('error.session.already_exists', $errorId,
+            'The error message should signify that the session name already exists');
+    }
+
+    public function testCanCreateTwoSessionsWithTheSameNameInDifferentGroups()
+    {
+        $otherGroupName = 'Rauchvereinigung';
+        $this->client->request('POST', '/group', ['name' => $otherGroupName]);
+        $groupRepository = $this->client->getContainer()->get('doctrine')->getManager()->getRepository('ApiBundle:Group');
+        $group = $groupRepository->findOneByName($otherGroupName);
+        $otherGroupUuid = $group->getUuid();
+
+        $sessionName = 'TheSmoeker';
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session', ['name' => $sessionName]);
+        $this->assertStatusCode(201, $this->client,
+            'Creating a new session should be successful.');
+
+        $this->client->request('POST', '/group/' . $otherGroupUuid . '/session', ['name' => $sessionName]);
+        $this->assertStatusCode(201, $this->client,
+            'Creating a new session with the same name in another group should be successful.');
+
+    }
+
 }

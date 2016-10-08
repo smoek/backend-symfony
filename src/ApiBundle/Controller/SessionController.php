@@ -36,6 +36,11 @@ class SessionController extends BaseController
 
         if ($form->isValid()) {
 
+            $errorView = $this->sessionNameExistsInGroup($group, $session);
+            if ($errorView instanceof View) {
+                return $errorView;
+            }
+
             $uuid = $this->findUniqueUuid();
 
             $session->setUuid($uuid);
@@ -95,6 +100,29 @@ class SessionController extends BaseController
         $em->flush();
 
         return View::create([], 200);
+    }
+
+    /**
+     * Check if a session with the same name already exists in the group
+     *
+     * @param Group $group
+     * @param Session $session
+     * @return View|null An error view if the name already exists, null otherwise
+     */
+    private function sessionNameExistsInGroup(Group $group, Session $session)
+    {
+        $sessionRepository = $this->getDoctrine()->getManager()->getRepository('ApiBundle:Session');
+        $existingSession = $sessionRepository->sessionNameExistsInGroup($group, $session);
+
+        if ($existingSession) {
+            $error = [
+                'id' => 'error.session.already_exists',
+                'message' => "A session named '{$session->getName()}' already exists in group '{$group->getUuid()}'.",
+            ];
+            return View::create($error, 409);
+        }
+
+        return null;
     }
 
     /**

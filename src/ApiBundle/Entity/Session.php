@@ -3,15 +3,17 @@
 namespace ApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\JoinTable;
-use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Session
  *
- * @ORM\Table(name="session")
+ * @ORM\Table(name="session", uniqueConstraints={
+ *     @UniqueConstraint(name="group_sessionname_unique", columns={"group_id", "name"})})
  * @ORM\Entity(repositoryClass="ApiBundle\Repository\SessionRepository")
+ * @UniqueEntity(fields={"group", "name"})
  */
 class Session
 {
@@ -36,7 +38,7 @@ class Session
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255, unique=true)
+     * @ORM\Column(name="name", type="string", length=255, unique=false)
      */
     private $name;
 
