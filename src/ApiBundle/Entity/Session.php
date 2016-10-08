@@ -48,6 +48,7 @@ class Session
      *
      * @ORM\ManyToOne(targetEntity="Group", inversedBy="sessions")
      * @ORM\JoinColumn(name="group_id")
+     * @Serializer\Exclude()
      */
     private $group;
 
