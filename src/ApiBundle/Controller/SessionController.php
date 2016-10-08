@@ -45,7 +45,6 @@ class SessionController extends BaseController
 
             $session->setUuid($uuid);
             $session->setGroup($group);
-            $session->setCreatedAt(new \DateTime());
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($session);

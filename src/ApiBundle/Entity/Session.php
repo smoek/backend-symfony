@@ -14,6 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     @UniqueConstraint(name="group_sessionname_unique", columns={"group_id", "name"})})
  * @ORM\Entity(repositoryClass="ApiBundle\Repository\SessionRepository")
  * @UniqueEntity(fields={"group", "name"})
+ * @ORM\HasLifecycleCallbacks()
  */
 class Session
 {
@@ -155,6 +156,16 @@ class Session
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    /**
+     * Set the creation time and date before persisting
+     *
+     * @ORM\PrePersist()
+     */
+    public function initCreatedAt()
+    {
+        $this->setCreatedAt(new \DateTime());
     }
 
     /**
