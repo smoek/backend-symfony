@@ -89,5 +89,11 @@ class GroupController extends BaseController
         return $group;
     }
 
+    /**
+     * @Route("/group", methods={"OPTIONS"})
+     * @Route("/group/{groupUuid}", methods={"OPTIONS"})
+     */
+    public function optionsAction() {}
+
 
 }

@@ -68,10 +68,11 @@ class SessionController extends BaseController
         return View::create($form, 400);
     }
 
-    public function optionsAction($groupUuid)
-    {
-
-    }
+    /**
+     * @Route("/group/{groupUuid}/session", methods={"OPTIONS"})
+     * @Route("/group/{groupUuid}/session/{sessionUuid}", methods={"OPTIONS"})
+     */
+    public function optionsAction() {}
 
     /**
      * @Route("/group/{uuid}/session/{sessionUuid}")

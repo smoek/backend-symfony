@@ -79,4 +79,9 @@ class SmoekController extends BaseController
 
         return View::create([], 200);
     }
+
+    /**
+     * @Route("/group/{groupUuid}/session/{sessionUuid}/smoek", methods={"OPTIONS"})
+     */
+    public function optionsAction() {}
 }
