@@ -233,9 +233,14 @@ class Group
     {
         /** @var ArrayCollection $sessions */
         $sessions = $this->getSessions();
-        $supporters = array_filter($sessions->toArray(), function(Session $session) {
+
+        /*
+         * Only use the values. Otherwise the JSON serialization may turn this into an Object (when the indices do not
+         * start with 0 or are inconsecutively numbered
+         */
+        $supporters = array_values(array_filter($sessions->toArray(), function(Session $session) {
             return $session->getSmoek();
-        });
+        }));
 
         return $supporters;
     }

@@ -44,13 +44,20 @@ class SmoekControllerTest extends WebTestCase
 
     public function testCanRequestSmoek()
     {
-        $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
+        /*
+         * Do not pick the first session, to force the JSON serialization to have to decide between an array and
+         * and an object. See \ApiBundle\Entity\Group::getSupporters for more details.
+         */
+        $sessionUuid = $this->sessionUuids[1];
+
+        $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $sessionUuid . '/smoek');
         $this->assertStatusCode(200, $this->client);
 
         $status = json_decode($this->client->getResponse()->getContent());
         $this->assertTrue($status->requested);
+        $this->assertTrue(is_array($status->supporters), 'The list of supporters must be an array to be API conform');
         $this->assertCount(1, $status->supporters);
-        $this->assertEquals($this->sessionUuids[0], $status->supporters[0]->id);
+        $this->assertEquals($sessionUuid, $status->supporters[0]->id);
 
         $expectedExpiresAt = new \DateTime('now +10 minutes');
         $this->assertEquals($expectedExpiresAt, new \DateTime($status->expiresAt), 10);
