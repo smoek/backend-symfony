@@ -138,6 +138,9 @@ class SmoekControllerTest extends WebTestCase
 
         $this->client->request('DELETE', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[1]. '/smoek');
         $this->assertStatusCode(409, $this->client);
+        $error = json_decode($this->client->getResponse()->getContent());
+        $this->assertEquals('error.smoek.smoek_confirmed', $error->id);
+        $this->assertEquals('SMØK vote has already been confirmed.', $error->message);
     }
 
     public function testStillRequires50PercentQuorumWhenSessionsAreLeavingTheGroup()

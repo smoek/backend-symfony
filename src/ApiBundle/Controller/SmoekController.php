@@ -62,7 +62,11 @@ class SmoekController extends BaseController
         $em = $this->getDoctrine()->getManager();
 
         if ($group->getSmoekConfirmedAt() !== null) {
-            return View::create([], 409);
+            $error = [
+                'id' => 'error.smoek.smoek_confirmed',
+                'message' => 'SMØK vote has already been confirmed.',
+            ];
+            return View::create($error, 409);
         }
 
         $session->setSmoek(false);
