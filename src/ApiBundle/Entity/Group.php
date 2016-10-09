@@ -162,6 +162,7 @@ class Group
     {
         $expiresAt = $this->getSmoekRequestedAt();
         if ($expiresAt !== null) {
+            $expiresAt = clone $expiresAt;
             $expiresAt->modify('+' . self::SMOEK_VOTE_TIMEOUT);
         }
         $this->status = new SmoekStatus($this, $expiresAt);
