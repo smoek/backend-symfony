@@ -10,6 +10,7 @@ namespace ApiBundle\Controller;
 
 use ApiBundle\Entity\Group;
 use ApiBundle\Entity\Session;
+use ApiBundle\Entity\SmoekStatus;
 use FOS\RestBundle\Controller\Annotations\Route;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 use FOS\RestBundle\View\View;
@@ -46,9 +47,10 @@ class SmoekController extends BaseController
             $group->setSmoekConfirmedAt(new \DateTime());
         }
 
+        $group->updateStatus();
         $em->flush();
 
-        return View::create([], 201);
+        return View::create($group->getStatus(), 200);
     }
 
     /**
@@ -77,7 +79,7 @@ class SmoekController extends BaseController
         $group->updateStatus();
         $em->flush();
 
-        return View::create([], 200);
+        return View::create($group->getStatus(), 200);
     }
 
     /**

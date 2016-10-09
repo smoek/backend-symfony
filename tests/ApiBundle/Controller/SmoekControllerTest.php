@@ -45,11 +45,9 @@ class SmoekControllerTest extends WebTestCase
     public function testCanRequestSmoek()
     {
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $status = $decodedResponse->status;
+        $status = json_decode($this->client->getResponse()->getContent());
         $this->assertTrue($status->requested);
         $this->assertCount(1, $status->supporters);
         $this->assertEquals($this->sessionUuids[0], $status->supporters[0]->id);
@@ -61,11 +59,10 @@ class SmoekControllerTest extends WebTestCase
     public function testMaintainsExpiresAtForSubsequentSmoekRequests()
     {
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $expectedExpiresAt = $decodedResponse->status->expiresAt;
+        $status = json_decode($this->client->getResponse()->getContent());
+        $expectedExpiresAt = $status->expiresAt;
         $this->assertNotNull($expectedExpiresAt,
             'The Smoek expiry time should be set after the first Smoek request.');
 
@@ -73,33 +70,29 @@ class SmoekControllerTest extends WebTestCase
         sleep(2);
 
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[1] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $this->assertEquals($expectedExpiresAt, $decodedResponse->status->expiresAt,
+        $status = json_decode($this->client->getResponse()->getContent());
+        $this->assertEquals($expectedExpiresAt, $status->expiresAt,
             'The Smoek expiry time should not change after subsequent Smoek requests.');
 
         $this->client->request('DELETE', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
         $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $this->assertEquals($expectedExpiresAt, $decodedResponse->status->expiresAt,
+        $status = json_decode($this->client->getResponse()->getContent());
+        $this->assertEquals($expectedExpiresAt, $status->expiresAt,
             'The Smoek vote expiry time should not change after the initiating Smoek request has been deleted.');
     }
 
     public function testCanDeleteSmoek()
     {
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
         $this->client->request('DELETE', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
         $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $smoekStatus = $decodedResponse->status;
+        $smoekStatus = json_decode($this->client->getResponse()->getContent());
         $this->assertObjectNotHasAttribute('expiresAt', $smoekStatus,
             'The Smoek vote expiry time should be reset when there are no more supporters left.');
     }
@@ -115,25 +108,21 @@ class SmoekControllerTest extends WebTestCase
             'The Smoek request should not be confirmed when there are no supporters.');
 
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[0] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $smoekStatus = $decodedResponse->status;
+        $smoekStatus = json_decode($this->client->getResponse()->getContent());
         $this->assertTrue($smoekStatus->requested,
             'The Smoek should be requested when there is at least one supporter.');
         $this->assertFalse($smoekStatus->confirmed,
             'The Smoek should not be confirmed when there are less than 50% supporters.');
 
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[1] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
         $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[2] . '/smoek');
-        $this->assertStatusCode(201, $this->client);
+        $this->assertStatusCode(200, $this->client);
 
-        $this->client->request('GET', '/group/' . $this->groupUuid);
-        $decodedResponse = json_decode($this->client->getResponse()->getContent());
-        $smoekStatus = $decodedResponse->status;
+        $smoekStatus = json_decode($this->client->getResponse()->getContent());
         $this->assertTrue($smoekStatus->requested,
             'The Smoek should be requested when there is at least one supporter.');
         $this->assertTrue($smoekStatus->confirmed,
@@ -144,7 +133,7 @@ class SmoekControllerTest extends WebTestCase
     {
         foreach ($this->sessionUuids as $sessionUuid) {
             $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $sessionUuid . '/smoek');
-            $this->assertStatusCode(201, $this->client);
+            $this->assertStatusCode(200, $this->client);
         }
 
         $this->client->request('DELETE', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[1]. '/smoek');
@@ -155,7 +144,7 @@ class SmoekControllerTest extends WebTestCase
     {
         for ($i = 0; $i < 2; $i++) {
             $this->client->request('POST', '/group/' . $this->groupUuid . '/session/' . $this->sessionUuids[$i]. '/smoek');
-            $this->assertStatusCode(201, $this->client);
+            $this->assertStatusCode(200, $this->client);
         }
 
         $this->client->request('GET', '/group/' . $this->groupUuid);
